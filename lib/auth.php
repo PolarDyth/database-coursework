@@ -3,7 +3,7 @@
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
-$env = parse_ini_file(__DIR__ . '/../../.env', true);
+$env = parse_ini_file($_SERVER["DOCUMENT_ROOT"] . "/database/.env", true);
 $secret = $env['JWT_SECRET'] ?? 'default_secret_key';
 
 $user = null;

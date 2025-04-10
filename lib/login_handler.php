@@ -32,7 +32,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         "exp" => time() + 86400 * 30
       ];
 
-      $env = parse_ini_file(__DIR__ . '/../../../.env', true);
+      $env = parse_ini_file($_SERVER["DOCUMENT_ROOT"] . "/database/.env", true);
       $secret = $env["JWT_SECRET"] ?: 'default_secret_key';
       $jwt = JWT::encode($payload, $secret, 'HS256');
 

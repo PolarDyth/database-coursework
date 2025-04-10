@@ -19,11 +19,12 @@ if (!$hasFilters && !empty($user['preferences'])) {
   exit();
 }
 
+
 $cuisineStmt = $conn->prepare("SELECT id, name FROM Cuisines");
 $cuisineStmt->execute();
 $cuisines = $cuisineStmt->get_result();
 
-$selectedCuisine = $_GET['cuisine_id'] ?? [];
+$selectedCuisines = $_GET['cuisine_id'] ?? [];
 $minRating = $_GET['min_rating'] ?? '';
 $location = $_GET['location'] ?? '';
 
@@ -42,19 +43,15 @@ $query = "SELECT
 $params = [];
 $types = "";
 
-if (!empty($selectedCuisine)) {
-  $inClause = implode(',', array_fill(0, count($selectedCuisine), '?'));
-  $query .= " AND Cuisines.id IN ($inClause)";
-  $params = array_merge($params, $selectedCuisine);
-  $types .= str_repeat("i", count($selectedCuisine));
-}
-
-$havingClause = "";
-
-if (!empty($minRating)) {
-  $havingClause = " HAVING AVG(Reviews.rating) >= ?";
-  $params[] = $minRating;
-  $types .= "d";
+if (!empty($selectedCuisines)) {
+  $inClause = implode(',', array_fill(0, count($selectedCuisines), '?'));
+  $query .= " AND Restaurants.id IN (
+    SELECT restaurantID
+    FROM restaurantcuisine
+    WHERE cuisineID IN ($inClause)
+  )";
+  $params = array_merge($params, $selectedCuisines);
+  $types .= str_repeat("i", count($selectedCuisines));
 }
 
 if (!empty($location)) {
@@ -63,8 +60,15 @@ if (!empty($location)) {
   $types .= "s";
 }
 
-$query .= " GROUP BY Restaurants.id" . $havingClause;
+$havingClause = "";
 
+if (!empty($minRating)) {
+  $havingClause .= " HAVING AVG(Reviews.rating) >= ?";
+  $params[] = $minRating;
+  $types .= "d";
+}
+
+$query .= " GROUP BY Restaurants.id" . $havingClause;
 
 $stmt = $conn->prepare($query);
 if (!empty($params)) {
@@ -90,7 +94,6 @@ $results = $stmt->get_result();
   <section class="container">
     <h2 class="section-title">Explore Restaurants</h2>
 
-    <!-- Filter Form -->
     <form method="get" action="home" class="filter-form">
       <?php
       $selectedCuisines = $_GET['cuisine_id'] ?? [];
@@ -120,9 +123,9 @@ $results = $stmt->get_result();
       </div>
 
       <button type="submit" class="btn">Apply Filters</button>
+      <a href="/database/home?min_rating=&location=" class="btn reset-btn">Reset Filters</a>
     </form>
 
-    <!-- Results -->
     <div class="restaurant-cards">
       <?php if ($results->num_rows > 0): ?>
         <?php while ($row = $results->fetch_assoc()): ?>

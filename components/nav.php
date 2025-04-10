@@ -4,7 +4,7 @@ require_once $_SERVER["DOCUMENT_ROOT"] . '/cw2/php/components/auth/auth.php';
 
 <header>
   <div class="container">
-    <h1><a href="/cw2" style="color: white; text-decoration: none;">Food Advisor</a></h1>
+    <h1><a href="/database" style="color: white; text-decoration: none;">Food Advisor</a></h1>
     <nav>
       <ul>
         <?php if ($user): ?>

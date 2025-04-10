@@ -9,7 +9,7 @@ function DBConnect()
     $dbname = $env['DB_NAME'] ?: 'test_db';
     $conn = null;
     try {
-        $conn = new mysqli($host, $username, $password, $dbname);
+        $conn = mysqli_connect($host, $username, $password, $dbname);
 
         if ($conn->connect_error) {
             throw new Exception("Connection failed: " . $conn->connect_error);
